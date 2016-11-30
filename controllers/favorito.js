@@ -8,12 +8,31 @@ function prueba(req, res){
 
 function getFavorito(req, res){
     let id = req.params.id;
-    res.status(200).send({favorito:id});
-
+    Favorito.findById(id, (err, data) => {
+        if (err){
+            res.status(500).send({message: 'error al devolver el marcador'});
+        } else {
+            if(!data){
+                res.status(404).send({message: 'No hay marcador'});
+            } else {
+                res.status(200).send({data})
+            }
+        }
+    });
 }
 
 function getFavoritos(req, res){
-    
+    Favorito.find({},(err, data) => {
+        if (err) {
+            res.status(500).send('error al devolver los marcadores');
+        } else {
+            if (!data) {
+                res.status(404).send({message: 'no hay marcadores'});
+            } else {
+                res.status(200).send({data});
+            }
+        }  
+    });
 }
 
 function saveFavorito(req, res){
@@ -25,25 +44,48 @@ function saveFavorito(req, res){
     favorito.save((err, data)=>{
         if(err) {
             res.status(500).send({message: `Error al guardar el marcador favorito`});
+        } else {
+            res.status(200).send({favorito: data});
         }
-        res.status(200).send({favorito: data});
     });
-    res.status(200).send({favorito:params});
 }
 
 function updateFavorito(req, res){
     let params = req.body;
-    res.status(200).send({update: true});
+    let id = req.params.id;
+    Favorito.findByIdAndUpdate(id, params, (err, data) => {
+        if (err){
+            res.status(500).send({message: 'Error al actualizar el marcador'});
+        } else {
+            res.status(200).send({params});
+        }
+    });
 }
 
 function deleteFavorito(req, res){
     let id = req.params.id;
-    res.status(200).send({delete: true});
+    Favorito.findById(id, (err, data) => {
+        if (err){
+            res.status(500).send({message: 'error al devolver el marcador'});
+        }
+        if(!data){
+            res.status(404).send({message: 'No hay marcador'});
+        } else {
+            data.remove(err => {
+                if (err) {
+                    res.status(500).send({message:'Error al borrar'});
+                } else {
+                    res.status(200).send({message: 'El marcador se ha eliminado'});
+                }
+            });
+        }
+    });
 }
 
 module.exports = {
     prueba,
     getFavorito,
+    getFavoritos,
     saveFavorito,
     updateFavorito,
     deleteFavorito
